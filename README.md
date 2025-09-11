@@ -78,7 +78,7 @@ There are no businesses within 5 miles of this point, so we should expand the se
 
 ### Submission
 
-- Email your submisson to `chris@rejigg.com`.  It should include:
+- Email your submisson to `barrett@rejigg.com`.  It should include:
   - A link to a repository with your code (or you can include it as an attachment if you prefer)
   - Include brief notes or comments if you made tradeoffs or assumptions (as if you were writing a pull request).
   - Discuss how you would productionize your submission (including how you would think about performance as the number of businesses scales)
