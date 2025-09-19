@@ -20,9 +20,11 @@ class BusinessViewSet(viewsets.ModelViewSet):
         results = []
 
         if request.method == "POST":
-            locations       = request.data.get("locations", [])
-            search_text     = request.data.get("text", "")
-            search_radius   = request.data.get("radius_miles", RADIUS_MILES_OPTIONS[0]) # if none is provided use the first one
+            locations = request.data.get("locations", [])
+            search_text = request.data.get("text", "")
+
+            # if none is provided use the first one
+            search_radius = request.data.get("radius_miles", RADIUS_MILES_OPTIONS[0])
 
             # Assumes that input is well-formed, otherwise we should be validating our inputs be
             for location in locations:
@@ -30,7 +32,9 @@ class BusinessViewSet(viewsets.ModelViewSet):
                 # Gets locations based on State
                 if location.get("state") is not None:
                     # Assume always capital state code
-                    businesses_from_state = self.queryset.filter(state=location.get("state")).filter(name__icontains=search_text)
+                    businesses_from_state = self.queryset.filter(state=location.get("state")).filter(
+                        name__icontains=search_text)
+
                     serializer = self.get_serializer(businesses_from_state, many=True)
                     results.extend(serializer.data)
 
@@ -40,8 +44,8 @@ class BusinessViewSet(viewsets.ModelViewSet):
                     city, state = [part.strip() for part in location.get("city").split(",")]
 
                     businesses_from_city_state = (self.queryset.filter(city=city)
-                                            .filter(state=state)
-                                            .filter(name__icontains=search_text))
+                                                  .filter(state=state)
+                                                  .filter(name__icontains=search_text))
 
                     serializer = self.get_serializer(businesses_from_city_state, many=True)
                     results.extend(serializer.data)
@@ -68,6 +72,5 @@ class BusinessViewSet(viewsets.ModelViewSet):
 
                     serializer = self.get_serializer(businesses_with_in_radius, many=True)
                     results.extend(serializer.data)
-
 
         return Response({"results": [results]}, status=status.HTTP_200_OK)
