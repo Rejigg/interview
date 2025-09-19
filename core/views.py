@@ -7,6 +7,7 @@ from .models import Business
 from .serializers import BusinessSerializer
 
 from .constants import RADIUS_MILES_OPTIONS
+from .utils import haversine
 
 
 class BusinessViewSet(viewsets.ModelViewSet):
@@ -46,6 +47,27 @@ class BusinessViewSet(viewsets.ModelViewSet):
                     results.extend(serializer.data)
 
                 # Get locations based on lat/long
+                if location.get("lat") is not None and location.get("lng") is not None:
+                    lat = location.get("lat")
+                    lng = location.get("lng")
+
+                    # Ideally this is handled in SQL, sqlite doesn't allow for this
+                    # implement a bounding box to limit set before running haversine
+
+                    businesses_with_in_radius = []
+
+                    # Iterate through business and check if their distance is within the distance of lat/lng and search radius
+                    # TODO: Increase the search radius if businesses_with_in_radius is empty
+                    businesses_by_lat_lng = self.queryset.filter(name__icontains=search_text)
+
+                    for business in businesses_by_lat_lng:
+                        distance = haversine(lat, lng, business.latitude, business.longitude)
+
+                        if distance <= search_radius:
+                            businesses_with_in_radius.append(business)
+
+                    serializer = self.get_serializer(businesses_with_in_radius, many=True)
+                    results.extend(serializer.data)
 
 
         return Response({"results": [results]}, status=status.HTTP_200_OK)
