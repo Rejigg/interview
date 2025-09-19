@@ -25,6 +25,7 @@ class BusinessViewSet(viewsets.ModelViewSet):
 
             # Assumes that input is well-formed, otherwise we should be validating our inputs be
             for location in locations:
+                # TODO: Would be good to find a way to combine the state and city lookups to filter on a city if we have one
                 # Gets locations based on State
                 if location.get("state") is not None:
                     # Assume always capital state code
@@ -32,9 +33,19 @@ class BusinessViewSet(viewsets.ModelViewSet):
                     serializer = self.get_serializer(businesses_from_state, many=True)
                     results.extend(serializer.data)
 
-                # Get location based on cities
+                # When a user enters city assume they also have a state so we can filter in that city and state
+                # Assumes that the city would have been geocoded with Google geocoding API so we technically wouldn't need this
+                if location.get("city") is not None:
+                    city, state = [part.strip() for part in location.get("city").split(",")]
 
+                    businesses_from_city_state = (self.queryset.filter(city=city)
+                                            .filter(state=state)
+                                            .filter(name__icontains=search_text))
+
+                    serializer = self.get_serializer(businesses_from_city_state, many=True)
+                    results.extend(serializer.data)
 
                 # Get locations based on lat/long
+
 
         return Response({"results": [results]}, status=status.HTTP_200_OK)
