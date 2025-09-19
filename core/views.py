@@ -5,8 +5,6 @@ from rest_framework.permissions import AllowAny
 
 from .models import Business
 from .serializers import BusinessSerializer
-
-from .constants import RADIUS_MILES_OPTIONS
 from .services.business_search_service import BusinessSearchService
 
 
