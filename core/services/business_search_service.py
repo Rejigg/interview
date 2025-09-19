@@ -44,7 +44,7 @@ class BusinessSearchService:
             if businesses_in_radius:
                 return businesses_in_radius, radius  # Return first non-empty radius
 
-        return []
+        return [], radius
 
     # Assumes that input is well-formed, otherwise we should be validating our inputs be
     def search_locations(self, locations):
