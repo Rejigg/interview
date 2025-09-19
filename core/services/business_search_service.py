@@ -49,6 +49,7 @@ class BusinessSearchService:
     # Assumes that input is well-formed, otherwise we should be validating our inputs be
     def search_locations(self, locations):
         results = []
+        expanded_radii_info = []
 
         for location in locations:
             # Retrieves locations based on state
@@ -65,6 +66,15 @@ class BusinessSearchService:
                 businesses, expanded_radius = self.filter_by_radius(lat, lng)
                 results.extend(businesses)
 
+                # Record instances where the radius was expanded, return to front end with this data
+                if expanded_radius != self.search_radius:
+                    expanded_radii_info.append({
+                        "lat": float(lat),
+                        "lng": float(lng),
+                        "radius": expanded_radius
+                    })
+
+
         # Make unique list by ID
         unique_results = list({b.id: b for b in results}.values())
-        return unique_results
+        return unique_results, expanded_radii_info

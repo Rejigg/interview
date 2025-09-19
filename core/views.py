@@ -15,24 +15,21 @@ class BusinessViewSet(viewsets.ModelViewSet):
     serializer_class = BusinessSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=["post", "get"], url_path="search")
+    # Changed this to always use a POST request since the payload can be nested and more complicated
+    @action(detail=False, methods=["post"], url_path="search")
     def search(self, request):
-        results = []
+        locations = request.data.get("locations", [])
+        search_text = request.data.get("text", "")
+        search_radius = request.data.get("radius_miles")
 
-        if request.method == "POST":
-            locations = request.data.get("locations", [])
-            search_text = request.data.get("text", "")
-            search_radius = request.data.get("radius_miles")
+        business_search_service = BusinessSearchService(
+            queryset=self.queryset,
+            search_text=search_text,
+            search_radius=search_radius
+        )
 
-            business_search_service = BusinessSearchService(
-                queryset=self.queryset,
-                search_text=search_text,
-                search_radius=search_radius
-            )
+        unique_businesses, expanded_radii = business_search_service.search_locations(locations)
+        serializer = self.get_serializer(unique_businesses, many=True)
+        results = serializer.data
 
-            unique_businesses = business_search_service.search_locations(locations)
-            serializer = self.get_serializer(unique_businesses, many=True)
-            results = serializer.data
-
-        #TODO: Explain when a search radius was expanded
-        return Response({"results": results}, status=status.HTTP_200_OK)
+        return Response({"results": results, "expanded_radii": expanded_radii}, status=status.HTTP_200_OK)
