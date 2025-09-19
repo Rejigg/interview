@@ -30,7 +30,7 @@ class BusinessViewSet(viewsets.ModelViewSet):
                     # Assume always capital state code
                     businesses_from_state = self.queryset.filter(state=location.get("state")).filter(name__icontains=search_text)
                     serializer = self.get_serializer(businesses_from_state, many=True)
-                    results.append(serializer.data)
+                    results.extend(serializer.data)
 
                 # Get location based on cities
 
